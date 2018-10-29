@@ -1,0 +1,79 @@
+{
+    "extends": "tslint:recommended",
+    "rules": {
+        "max-line-length": [true, 160],
+        "max-file-line-count": [true, 300],
+        "indent": [true, "spaces", 4],
+        "semicolon": [true, "always"],
+        "whitespace": [true, "always"],
+        "align": [true, "parameters", "arguments", "statements"],
+        "no-arg": true,
+        "no-empty": true,
+        "new-parens": true,
+        "no-bitwise": true,
+        "prefer-const": true,
+        "ordered-imports": false,
+        "trailing-comma": false,
+        "no-var-requires": false,
+        "newline-before-return": true,
+        "no-consecutive-blank-lines": [true, 1],
+        "one-line": [true, "check-catch", "check-finally", "check-else"],
+        "no-trailing-whitespace": true,
+        "object-literal-sort-keys": false,
+        "no-console": {
+            "severity": "warning",
+            "options": [
+                "debug",
+                "info",
+                "log",
+                "time",
+                "timeEnd",
+                "trace"
+            ]
+        },
+        "quotemark": {
+            "options": [
+                "single",
+                "avoid-escape"
+            ]
+        }
+    },
+    "jsRules": {
+        "max-line-length": [true, 160],
+        "max-file-line-count": [true, 300],
+        "indent": [true, "spaces", 4],
+        "semicolon": [true, "always"],
+        "whitespace": [true, "always"],
+        "align": [true, "parameters", "arguments", "statements"],
+        "no-arg": true,
+        "no-empty": true,
+        "new-parens": true,
+        "no-bitwise": true,
+        "prefer-const": true,
+        "ordered-imports": false,
+        "trailing-comma": false,
+        "no-var-requires": false,
+        "newline-before-return": true,
+        "no-consecutive-blank-lines": [true, 1],
+        "one-line": [true, "check-catch", "check-finally", "check-else"],
+        "no-trailing-whitespace": true,
+        "object-literal-sort-keys": false,
+        "no-console": {
+            "severity": "warning",
+            "options": [
+                "debug",
+                "info",
+                "log",
+                "time",
+                "timeEnd",
+                "trace"
+            ]
+        },
+        "quotemark": {
+            "options": [
+                "single",
+                "avoid-escape"
+            ]
+        }
+    }
+}

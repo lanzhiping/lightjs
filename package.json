@@ -1,0 +1,45 @@
+{
+    "name": "lightjs",
+    "version": "1.0.0",
+    "description": "LightJs, really really light for small projects.",
+    "repository": "https://github.com/lanzhiping/lightjs.git",
+    "author": "lanzhiping6@gmail.com",
+    "license": "MIT",
+    "scripts": {
+        "dev": "webpack-dev-server --hot --info=false --progress",
+        "lint": "tslint -p tsconfig.json -c tslint.json",
+        "test": "ts-node -O '{\"module\": \"commonjs\"}' testRunner.ts",
+        "build": "NODE_ENV=production webpack",
+        "postinstall": "bash ./scripts/postinstall.sh"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.1.2",
+        "@babel/plugin-transform-runtime": "^7.1.0",
+        "@babel/preset-env": "^7.1.0",
+        "@babel/register": "^7.0.0",
+        "@types/mocha": "^5.2.5",
+        "@types/webpack": "^4.4.16",
+        "babel-loader": "^8.0.4",
+        "clean-webpack-plugin": "^0.1.19",
+        "css-loader": "^1.0.0",
+        "file-loader": "^2.0.0",
+        "fork-ts-checker-webpack-plugin": "^0.4.10",
+        "html-webpack-plugin": "^3.2.0",
+        "mini-css-extract-plugin": "^0.4.4",
+        "mocha": "^5.2.0",
+        "style-loader": "^0.23.1",
+        "ts-loader": "^5.2.1",
+        "ts-node": "^7.0.1",
+        "tslint": "^5.11.0",
+        "typescript": "^3.1.3",
+        "url-loader": "^1.1.2",
+        "webpack": "^4.20.2",
+        "webpack-cli": "^3.1.2",
+        "webpack-dev-server": "^3.1.9"
+    },
+    "browserslist": "> 1%, ie >= 10, ios >= 9, android >= 4",
+    "dependencies": {
+        "@babel/polyfill": "^7.0.0",
+        "@babel/runtime": "^7.1.2"
+    }
+}

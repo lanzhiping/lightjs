@@ -1,0 +1,39 @@
+{
+    "include": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.js",
+        "**/*.scss",
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ],
+    "compilerOptions": {
+        "baseUrl": ".",
+        "typeRoots": ["./node_modules/@types", "./typings"],
+        "module": "esnext",
+        "moduleResolution": "node",
+        "noImplicitAny": false,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictPropertyInitialization": true,
+        "allowSyntheticDefaultImports": true,
+        "importHelpers": true,
+        "declaration": false,
+        "sourceMap": true,
+        "checkJs": false,
+        "allowJs": true,
+        "target": "es2015",
+        "lib": [
+            "dom",
+            "es2015",
+            "es2016",
+            "esnext"
+        ],
+    }
+}
