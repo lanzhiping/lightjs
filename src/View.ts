@@ -1,3 +1,5 @@
+import assignWith from 'lodash/assignWith';
+
 interface IViewOpts {
     [key: string]: any;
 }
@@ -33,20 +35,33 @@ class View {
     }
 
     public render(): void {
-        if (typeof this.template === 'string') {
-            this.el.innerHTML = this.template;
-        }
-        if (typeof this.template === 'function') {
-            this.el.innerHTML = this.template(this.props);
-        }
-        if (this.el.childElementCount > 1) {
-            throw { message: 'cannot have more than one child node in template' };
-        }
-        if (!this.rendered) {
+        if (this.rendered) {
+            const newEle = window.document.createElement('div');
+
+            if (typeof this.template === 'string') {
+                newEle.innerHTML = this.template;
+            }
+            if (typeof this.template === 'function') {
+                newEle.innerHTML = this.template(this.props);
+            }
+
+            this.patchAttributes(newEle);
+        } else {
+            if (typeof this.template === 'string') {
+                this.el.innerHTML = this.template;
+            }
+            if (typeof this.template === 'function') {
+                this.el.innerHTML = this.template(this.props);
+            }
+            if (this.el.childElementCount > 1) {
+                throw { message: 'cannot have more than one child node in template' };
+            }
+
             this.createBindings();
-        }
-        if (Object.keys(this.children)) {
-            this.renderChildren();
+
+            if (Object.keys(this.children)) {
+                this.renderChildren();
+            }
         }
         this.rendered = this.rendered || true;
     }
@@ -66,7 +81,7 @@ class View {
                 const element = this.el.querySelector(ele.replace('@', '')) as Element;
 
                 if (!ele || !eventType || !callback) {
-                    throw { message: `event setup error: ${ele} ${eventType}` };
+                    throw { message: `event setup error: ${ele} ${eventType}d` };
                 }
 
                 if (element) {
@@ -111,6 +126,36 @@ class View {
                 }
             });
     }
+
+    public patchAttributes(newEle): void {
+        const mergeByTypes = (originValue, newValue) => {
+            if (typeof originValue === 'function') {
+                return originValue;
+            }
+            if (originValue instanceof Array) {
+                return newValue;
+            }
+            if (typeof originValue === 'object') {
+                return mergeByTypes(originValue, newValue);
+            }
+
+            return newValue;
+        };
+
+        // todo: dom patching
+        assignWith(this.el, newEle, mergeByTypes);
+
+    }
 }
 
 export default View;
+
+export function renderDOM(rootSelector, [CustomView, props]: any[]) {
+    const element = window.document.querySelector(rootSelector);
+
+    if (element) {
+        const view = new CustomView(props);
+        element.innerHTML = '';
+        element.appendChild(view.el);
+    }
+}
