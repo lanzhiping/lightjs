@@ -1,150 +1,85 @@
-import assignWith from 'lodash/assignWith';
+import hyperhtml from 'hyperhtml/esm';
+import forIn from 'lodash/forIn';
+import channel from './ViewChannel';
 
 interface IViewOpts {
     [key: string]: any;
 }
 
-interface IBinding {
+interface IBindings {
     [key: string]: (self: View, event: Event) => void;
 }
 
 class View {
-    public template: string | ((templateOpt?: any) => string) = '';
+    public template?: (templateOpt?: any) => any;
 
     public el: Element = window.document.createElement('div');
 
     public props: any = {};
 
-    public binding: IBinding = {};
-
-    private eles: { [key: string]: Element } = {};
+    public bindings: IBindings = {};
 
     private rendered: boolean = false;
 
-    private children: {
-        [key: string]: () => View;
-    } = {};
+    private children: { [key: string]: () => View } = {};
 
     constructor(props?: IViewOpts) {
         if (props) {
             this.props = props || {};
         }
-        if (this.template) {
-            this.render();
-        }
     }
 
     public render(): void {
-        if (this.rendered) {
-            const newEle = window.document.createElement('div');
+        if (typeof this.template === 'function') {
+            hyperhtml(this.el).apply(null, this.template(this.props));
 
-            if (typeof this.template === 'string') {
-                newEle.innerHTML = this.template;
-            }
-            if (typeof this.template === 'function') {
-                newEle.innerHTML = this.template(this.props);
-            }
-
-            this.patchAttributes(newEle);
-        } else {
-            if (typeof this.template === 'string') {
-                this.el.innerHTML = this.template;
-            }
-            if (typeof this.template === 'function') {
-                this.el.innerHTML = this.template(this.props);
-            }
             if (this.el.childElementCount > 1) {
-                throw { message: 'cannot have more than one child node in template' };
+                const componentName = this.constructor.name;
+                throw { message: `[${componentName}]: cannot have more than one child node in template` };
             }
 
-            this.createBindings();
-
-            if (Object.keys(this.children)) {
-                this.renderChildren();
-            }
+            forIn(this.children, (childInitor, childName) => this.renderChildren(childInitor, childName));
+        } else {
+            const componentName = this.constructor.name;
+            throw { message: `[${componentName}]: template is not setup properly.` };
+        }
+        if (!this.rendered) {
+            forIn(this.bindings, (listener, selector) => channel.registerFromBindings(listener, selector));
         }
         this.rendered = this.rendered || true;
     }
 
     public updateProps(opt: any): void {
-        Object
-            .keys(this.props)
-            .forEach((key) => this.props[key] = opt[key]);
+        forIn(opt, (value, prop) => this.props[prop] = value);
         this.render();
     }
 
-    public createBindings() {
-        Object.keys(this.binding)
-            .map((key) => key.split(':'))
-            .forEach(([ele, eventType]) => {
-                const callback = this.binding[`${ele}:${eventType}`];
-                const element = this.el.querySelector(ele.replace('@', '')) as Element;
+    public hhtml(strings: TemplateStringsArray, ...vars: any[]) {
+        const variablesInTmpl = vars.map((variable, index) => {
+            const isVarViewComponent = variable instanceof Array && variable[0].prototype instanceof View;
 
-                if (!ele || !eventType || !callback) {
-                    throw { message: `event setup error: ${ele} ${eventType}d` };
-                }
+            if (isVarViewComponent) {
+                const [CustomView, props] = variable;
+                const instanceName = `${this.constructor.name}-${CustomView.name}-${index}`;
+                this.children[instanceName] = () => new CustomView(props);
 
-                if (element) {
-                    const listener = (event) => callback(this, event);
-                    element.addEventListener(eventType, listener);
-                    (element as any).distoryEvent = () => element.removeEventListener(eventType, listener);
-                    this.eles[ele] = element;
-                }
-            });
+                return hyperhtml`<div data-id="${instanceName}"></div>`;
+            } else {
+                return variable || '';
+            }
+        });
+
+        return [strings].concat(variablesInTmpl);
     }
 
-    public tmpl(strings: TemplateStringsArray, ...vars: any[]) {
-        return strings.reduce(
-            (final: string, current: string, index: number) => {
-                const variable = vars[index];
+    public renderChildren(childInitor: () => View, childName: string) {
+        const placeHolder = this.el.querySelector(`div[data-id="${childName}"]`);
 
-                if (variable instanceof Array && variable[0].prototype instanceof View) {
-                    const [CustomView, props] = variable;
-                    const instanceName = CustomView.name + index;
-                    this.children[instanceName] = () => new CustomView(props);
-
-                    return final + current + `<div data-id="${instanceName}"></div>`;
-                } else {
-                    return final + current + (variable || '');
-                }
-            },
-            ''
-        );
-    }
-
-    public renderChildren() {
-        Object.keys(this.children)
-            .forEach((childName) => {
-                const placeHolder = this.el.querySelector(`div[data-id="${childName}"]`);
-
-                if (placeHolder && placeHolder.parentNode) {
-                    const parentNode = placeHolder.parentNode;
-                    const viewInstance = this.children[childName]();
-                    parentNode.replaceChild(viewInstance.el.children[0], placeHolder);
-                } else {
-                    return;
-                }
-            });
-    }
-
-    public patchAttributes(newEle): void {
-        const mergeByTypes = (originValue, newValue) => {
-            if (typeof originValue === 'function') {
-                return originValue;
-            }
-            if (originValue instanceof Array) {
-                return newValue;
-            }
-            if (typeof originValue === 'object') {
-                return mergeByTypes(originValue, newValue);
-            }
-
-            return newValue;
-        };
-
-        // todo: dom patching
-        assignWith(this.el, newEle, mergeByTypes);
-
+        if (placeHolder && placeHolder.parentNode) {
+            const parentNode = placeHolder.parentNode;
+            const viewInstance = childInitor();
+            parentNode.replaceChild(viewInstance.el.children[0], placeHolder);
+        }
     }
 }
 
@@ -156,6 +91,6 @@ export function renderDOM(rootSelector, [CustomView, props]: any[]) {
     if (element) {
         const view = new CustomView(props);
         element.innerHTML = '';
-        element.appendChild(view.el);
+        element.appendChild(view.el.children[0]);
     }
 }

@@ -38,6 +38,7 @@
     "dependencies": {
         "@babel/polyfill": "^7.0.0",
         "@babel/runtime": "^7.1.2",
+        "hyperhtml": "^2.16.0",
         "lodash": "^4.17.11"
     }
 }
