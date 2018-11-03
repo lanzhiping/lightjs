@@ -1,42 +1,34 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpackMerge = require('webpack-merge');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const config = require('./config');
 
-module.exports = {
-    mode: config.env,
-    devtool: 'source-map',
-    entry: './examples/index.ts',
-    resolve: {
-        extensions: ['.ts', '.js', '.json'],
-    },
-    plugins: [
-        new HtmlWebpackPlugin({ template: './examples/index.html', ...config.htmlHead }),
-        new ForkTsCheckerWebpackPlugin(),
-    ],
-    module: {
-        rules: [
-            {
-                test: /\.tsx?$/,
-                use: [
-                    {
-                        loader: 'babel-loader',
-                        options: {
-                            presets: [['@babel/preset-env', { useBuiltIns: 'usage' }]],
-                            plugins: ['@babel/plugin-transform-runtime']
-                        }
-                    },
-                    { loader: 'ts-loader', options: { transpileOnly: true } }
-                ],
-                exclude: /node_modules/,
-            },
-            {
-                test: /\.css$/,
-                use: ['style-loader', 'css-loader']
-            }
+module.exports = webpackMerge(
+    {
+        mode: config.env,
+        resolve: {
+            extensions: ['.ts', '.js', '.json'],
+        },
+        plugins: [
+            new ForkTsCheckerWebpackPlugin(),
         ],
+        module: {
+            rules: [
+                {
+                    test: /\.ts$/,
+                    use: [
+                        {
+                            loader: 'babel-loader',
+                            options: {
+                                presets: [['@babel/preset-env', { useBuiltIns: 'usage' }]],
+                                plugins: ['@babel/plugin-transform-runtime']
+                            }
+                        },
+                        { loader: 'ts-loader', options: { transpileOnly: true } }
+                    ],
+                    exclude: /node_modules/,
+                }
+            ],
+        },
     },
-    devServer: {
-        compress: true,
-        port: 3000,
-    },
-};
+    config.webpackConfig
+);
