@@ -1,9 +1,9 @@
 import View from '../src/View';
 import hyperhtml from 'hyperhtml';
 
-class OtherView extends View {
+class Counter extends View {
     public bindings = {
-        'click:div.counter': () => {
+        'click:p.counter': () => {
             const count = this.props.count + 1;
             this.updateProps({ ...this.props, count });
         }
@@ -17,11 +17,14 @@ class OtherView extends View {
     }
 
     public template = (props) => this.hhtml`
-        <div class="counter">
-            Counter: ${props.count}
-            ${props.count % 2 ? hyperhtml`<p>sigular</p>` : hyperhtml`<p>odd</p>`}
-        </div>
+        <p class="counter">
+            Clicked times: ${props.count || '0'}
+            ${ props.count % 2
+                ? hyperhtml`(sigular)`
+                : hyperhtml`(odd)`
+            }
+        </p>
     `
 }
 
-export default OtherView;
+export default Counter;

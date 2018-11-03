@@ -1,3 +1,35 @@
 body {
     background: #e3e3e3;
 }
+
+.lightjs_greeting,
+.lightjs_counter {
+    border: 1px solid #3e3e3e;
+    margin: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    position: relative;
+}
+
+.lightjs_greeting:before,
+.lightjs_counter:before {
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 15px;
+    transform: translateY(-50%);
+    background: #e3e3e3;
+    padding: 0 5px;
+}
+
+.lightjs_greeting:before {
+    content: 'Greeting';
+}
+
+.lightjs_counter:before {
+    content: 'Counter';
+}
+
+.counter {
+    cursor: pointer;
+}

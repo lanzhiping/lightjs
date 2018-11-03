@@ -1,6 +1,6 @@
 import './index.css';
 import View, { renderDOM } from '../src/View';
-import OtherView from './OtherView';
+import Counter from './Counter';
 
 class MyView extends View {
     public bindings = {
@@ -9,13 +9,6 @@ class MyView extends View {
             this.updateProps({
                 ...this.props,
                 greetingName: inputName
-            });
-        },
-        'click:div.greeting': (event) => {
-            const count = Number(event.target.dataset.count) + 1;
-            this.updateProps({
-                ...this.props,
-                count
             });
         }
     };
@@ -26,16 +19,23 @@ class MyView extends View {
     }
 
     public template = (props) => this.hhtml`
-        <div class="greeting">
-            <p>Hello ${props.greetingName || 'world'}!</p>
-            <input class="greeting-input" value="${props.greetingName}"/>
-            ${[OtherView]}
+        <div class="lightjs">
+            <div class="lightjs_greeting">
+                <div>
+                    Please input a name:
+                    <input class="greeting-input" value="${props.greetingName}"/>
+                </div>
+                <p>Hello ${props.greetingName || 'world'}!</p>
+            </div>
+            <div class="lightjs_counter">
+                ${[Counter]}
+            </div>
         </div>
     `
 }
 
 function startApp() {
-    renderDOM('#app', [MyView, { greetingName: '123' }]);
+    renderDOM('#app', [MyView, { greetingName: 'world' }]);
 }
 
 if ((module as any).hot) {

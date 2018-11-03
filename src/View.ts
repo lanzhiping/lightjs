@@ -17,11 +17,11 @@ class View {
 
     public props: any = {};
 
-    public bindings: IBindings = {};
+    public bindings: IBindings = {}; // binding names are global, need to refactor it.
+
+    private children: { [key: string]: View } = {};
 
     private rendered: boolean = false;
-
-    private children: { [key: string]: () => View } = {};
 
     constructor(props?: IViewOpts) {
         if (props) {
@@ -37,8 +37,6 @@ class View {
                 const componentName = this.constructor.name;
                 throw { message: `[${componentName}]: cannot have more than one child node in template` };
             }
-
-            forIn(this.children, (childInitor, childName) => this.renderChildren(childInitor, childName));
         } else {
             const componentName = this.constructor.name;
             throw { message: `[${componentName}]: template is not setup properly.` };
@@ -55,31 +53,26 @@ class View {
     }
 
     public hhtml(strings: TemplateStringsArray, ...vars: any[]) {
-        const variablesInTmpl = vars.map((variable, index) => {
-            const isVarViewComponent = variable instanceof Array && variable[0].prototype instanceof View;
-
-            if (isVarViewComponent) {
-                const [CustomView, props] = variable;
-                const instanceName = `${this.constructor.name}-${CustomView.name}-${index}`;
-                this.children[instanceName] = () => new CustomView(props);
-
-                return hyperhtml`<div data-id="${instanceName}"></div>`;
-            } else {
-                return variable || '';
-            }
-        });
-
-        return [strings].concat(variablesInTmpl);
+        return [strings].concat(vars.map(this.mapExpression));
     }
 
-    public renderChildren(childInitor: () => View, childName: string) {
-        const placeHolder = this.el.querySelector(`div[data-id="${childName}"]`);
+    private mapExpression = (variable, index) => {
+        const isVarViewComponent = variable instanceof Array && variable[0].prototype instanceof View;
 
-        if (placeHolder && placeHolder.parentNode) {
-            const parentNode = placeHolder.parentNode;
-            const viewInstance = childInitor();
-            parentNode.replaceChild(viewInstance.el.children[0], placeHolder);
+        return isVarViewComponent
+            ? this.renderChild(variable, index)
+            : (variable === undefined ? '' : variable);
+    }
+
+    private renderChild(variable, index) {
+        const [CustomView, props] = variable;
+        const instanceName = `${CustomView.name}-${index}`;
+        if (!this.children[instanceName]) {
+            const viewInstance = new CustomView(props);
+            this.children[instanceName] = viewInstance.el.children[0];
         }
+
+        return this.children[instanceName];
     }
 }
 
